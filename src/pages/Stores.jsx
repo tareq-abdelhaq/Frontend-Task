@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import Modal from '../components/Modal'
 import TableActions from '../components/ActionButton/TableActions'
 import { useNavigate } from 'react-router-dom'
+import { useLibraryData } from '../hooks/useLibraryData'
 
 const Stores = () => {
     const navigate = useNavigate()
@@ -15,8 +16,8 @@ const Stores = () => {
     }
 
     // State declarations
-    const [stores, setStores] = useState([])
-    const [searchParams, setSearchParams] = useSearchParams()
+    const { stores: fetchedStores } = useLibraryData()
+    const [searchParams] = useSearchParams()
     const [searchTerm, setSearchTerm] = useState(
         searchParams.get('search') || ''
     )
@@ -27,23 +28,19 @@ const Stores = () => {
         name: '',
         address: '',
     })
+    const [skipPageReset, setSkipPageReset] = useState(false)
+    const [stores, setStores] = useState([])
+
+    // sync stores with fetched stores
+    useEffect(() => {
+        setStores(fetchedStores)
+    }, [fetchedStores])
 
     // Sync search term with URL query parameters
     useEffect(() => {
         const search = searchParams.get('search') || ''
         setSearchTerm(search)
     }, [searchParams])
-
-    // Fetch stores data
-    useEffect(() => {
-        fetch('/data/stores.json')
-            .then((response) => response.json())
-            .then((data) => {
-                console.log('Fetched stores:', data)
-                setStores(Array.isArray(data) ? data : [data])
-            })
-            .catch((error) => console.error('Error fetching stores:', error))
-    }, [])
 
     // Enrich stores with computed address and filter based on search term
     const filteredStores = useMemo(() => {
@@ -93,7 +90,6 @@ const Stores = () => {
                 id: 'actions',
                 cell: ({ row }) => (
                     <TableActions
-                        row={row}
                         onEdit={
                             editingRowId === row.original.id
                                 ? handleCancel
@@ -112,6 +108,7 @@ const Stores = () => {
     // Handle store deletion
     const deleteStore = (id, name) => {
         if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+            setSkipPageReset(true) // persist the table page state
             setStores((prevStores) =>
                 prevStores.filter((store) => store.id !== id)
             )
@@ -128,6 +125,7 @@ const Stores = () => {
 
     // Save edited name
     const handleSave = (id) => {
+        setSkipPageReset(true) // persist the table page state
         setStores(
             stores.map((store) =>
                 store.id === id ? { ...store, name: editName } : store
@@ -230,7 +228,8 @@ const Stores = () => {
             zip,
         }
 
-        setStores((prevStores) => [...prevStores, newStoreObject])
+        setSkipPageReset(false) // reset the table page state since we are adding a new one at the top
+        setStores((prevStores) => [newStoreObject, ...prevStores]) // add new store to the top of the list
         setNewStore({
             name: '',
             address: '',
@@ -248,6 +247,7 @@ const Stores = () => {
                     data={filteredStores}
                     columns={columns}
                     onRowClick={onRowClick}
+                    skipPageReset={skipPageReset}
                 />
             ) : (
                 <Loading />

@@ -2,7 +2,7 @@
 import React from 'react'
 import Loading from '../pages/Loading'
 import AuthorCard from '../components/Cards/AuthorCard'
-import useLibraryData from '../hooks/useLibraryData'
+import { useLibraryData } from '../hooks/useLibraryData'
 
 const BrowseAuthors = () => {
     const { authors, books, isLoading } = useLibraryData()

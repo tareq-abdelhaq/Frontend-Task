@@ -1,7 +1,9 @@
 // src/hooks/useLibraryData.js
 import { useEffect, useState, useMemo } from 'react'
 
-const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
+import { API_BASE_URL } from '../api'
+
+export const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
     // State for data
     const [books, setBooks] = useState([])
     const [authors, setAuthors] = useState([])
@@ -10,22 +12,22 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
 
     // Fetch all data
     useEffect(() => {
-        fetch('/data/stores.json')
+        fetch(`${API_BASE_URL}/stores`)
             .then((response) => response.json())
             .then((data) => setStores(Array.isArray(data) ? data : [data]))
             .catch((error) => console.error('Error fetching stores:', error))
 
-        fetch('/data/books.json')
+        fetch(`${API_BASE_URL}/books`)
             .then((response) => response.json())
             .then((data) => setBooks(Array.isArray(data) ? data : [data]))
             .catch((error) => console.error('Error fetching books:', error))
 
-        fetch('/data/authors.json')
+        fetch(`${API_BASE_URL}/authors`)
             .then((response) => response.json())
             .then((data) => setAuthors(Array.isArray(data) ? data : [data]))
             .catch((error) => console.error('Error fetching authors:', error))
 
-        fetch('/data/inventory.json')
+        fetch(`${API_BASE_URL}/inventory`)
             .then((response) => response.json())
             .then((data) => setInventory(Array.isArray(data) ? data : [data]))
             .catch((error) => console.error('Error fetching inventory:', error))
@@ -59,11 +61,13 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
 
         let filteredBooks = books
             .filter((book) =>
-                storeInventory.some((item) => item.book_id === book.id)
+                storeInventory.some(
+                    (item) => item.book_id === parseInt(book.id, 10)
+                )
             )
             .map((book) => {
                 const inventoryItem = storeInventory.find(
-                    (item) => item.book_id === book.id
+                    (item) => item.book_id === parseInt(book.id, 10)
                 )
                 return {
                     ...book,
@@ -91,7 +95,7 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
     const booksWithStores = useMemo(() => {
         return books.map((book) => {
             const bookInventory = inventory.filter(
-                (item) => item.book_id === book.id
+                (item) => item.book_id === parseInt(book.id, 10)
             )
             const bookStores = bookInventory.map((item) => ({
                 name: storeMap[item.store_id]?.name || 'Unknown Store',
@@ -99,6 +103,7 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
             }))
 
             return {
+                id: book.id, // needed to track the sold book in browse books page
                 title: book.name,
                 author: authorMap[book.author_id]?.name || 'Unknown Author',
                 stores: bookStores,
@@ -127,5 +132,3 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
         ),
     }
 }
-
-export default useLibraryData

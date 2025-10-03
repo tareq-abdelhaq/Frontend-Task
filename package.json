@@ -8,7 +8,8 @@
         "build": "vite build",
         "lint": "eslint .",
         "preview": "vite preview",
-        "format": "prettier --write src/"
+        "format": "prettier --write src/",
+        "server": "json-server --watch src/api/mock-server/db.json --port 4000"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.4",
@@ -28,6 +29,7 @@
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
         "globals": "^16.0.0",
+        "json-server": "^1.0.0-beta.3",
         "prettier": "3.6.2",
         "vite": "^6.3.1"
     }

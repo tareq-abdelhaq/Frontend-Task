@@ -1,7 +1,8 @@
 // src/components/StoreCard.jsx
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom' // Remove unused Navigate import
 const StoreCard = ({ name, noOfBooks, averagePrice, id }) => {
     const navigate = useNavigate()
+
     return (
         <div className="bg-white shadow-md rounded-lg p-4 h-[214px] w-112 flex gap-2">
             {/* Store Placeholder (instead of an image) */}

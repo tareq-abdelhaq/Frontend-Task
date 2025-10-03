@@ -5,10 +5,10 @@ import BooksTable from '../components/BooksTable'
 import { useSearchParams } from 'react-router-dom'
 import Modal from '../components/Modal'
 
+import { useLibraryData } from '../hooks/useLibraryData'
+
 const Books = () => {
-    const [books, setBooks] = useState([])
-    const [authors, setAuthors] = useState([])
-    const [searchParams, setSearchParams] = useSearchParams()
+    const [searchParams] = useSearchParams()
     const [searchTerm, setSearchTerm] = useState(
         searchParams.get('search') || ''
     )
@@ -20,27 +20,20 @@ const Books = () => {
         name: '',
         page_count: '',
     })
+    const [skipPageReset, setSkipPageReset] = useState(false)
+    const { books: fetchedBooks, authors } = useLibraryData() // Unified hook for all data
+    const [books, setBooks] = useState([])
+
+    // sync books with fetched books
+    useEffect(() => {
+        setBooks(fetchedBooks)
+    }, [fetchedBooks])
 
     // Sync search term with URL params
     useEffect(() => {
         const search = searchParams.get('search') || ''
         setSearchTerm(search)
     }, [searchParams])
-
-    // Fetch data
-    useEffect(() => {
-        Promise.all([
-            fetch('/data/books.json').then((response) => response.json()),
-            fetch('/data/authors.json').then((response) => response.json()),
-        ])
-            .then(([booksData, authorsData]) => {
-                setBooks(Array.isArray(booksData) ? booksData : [booksData])
-                setAuthors(
-                    Array.isArray(authorsData) ? authorsData : [authorsData]
-                )
-            })
-            .catch((error) => console.error('Error fetching data:', error))
-    }, [])
 
     // Filter books based on search
     const filteredBooks = books.filter((book) => {
@@ -53,6 +46,7 @@ const Books = () => {
     // Delete book handler
     const deleteBook = (id, name) => {
         if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+            setSkipPageReset(true) // persist the table page state
             setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id))
             setEditingRowId(null)
             setEditName('')
@@ -66,6 +60,11 @@ const Books = () => {
             return
         }
 
+        if (isNaN(newBook.page_count) || newBook.page_count <= 0) {
+            alert('Page count must be a number')
+            return
+        }
+
         const newId =
             books.length > 0 ? Math.max(...books.map((b) => b.id)) + 1 : 1
         const newBookObject = {
@@ -75,7 +74,8 @@ const Books = () => {
             page_count: parseInt(newBook.page_count),
         }
 
-        setBooks((prevBooks) => [...prevBooks, newBookObject])
+        setSkipPageReset(false) // reset the table page state since we are adding a new one at the top
+        setBooks((prevBooks) => [newBookObject, ...prevBooks])
         setNewBook({ author_id: '', name: '', page_count: '' })
         setShowModal(false)
     }
@@ -93,6 +93,8 @@ const Books = () => {
                     setEditName={setEditName}
                     setBooks={setBooks}
                     deleteBook={deleteBook}
+                    skipPageReset={skipPageReset}
+                    setSkipPageReset={setSkipPageReset}
                 />
             ) : (
                 <Loading />

@@ -7,7 +7,12 @@ import {
 } from '@tanstack/react-table'
 import { useMemo, useState, useRef, useEffect } from 'react'
 
-export default function Table({ data, columns, onRowClick }) {
+export default function Table({
+    data,
+    columns,
+    onRowClick,
+    skipPageReset = false,
+}) {
     const [rowSelection, setRowSelection] = useState({})
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -16,12 +21,12 @@ export default function Table({ data, columns, onRowClick }) {
     const [sorting, setSorting] = useState([])
 
     // Add skip reset ref
-    const skipPageResetRef = useRef(false)
+    const skipPageResetRef = useRef(skipPageReset)
 
-    // Reset flag after data updates
-    useEffect(() => {
-        skipPageResetRef.current = false
-    }, [data])
+    // not needed effect since we made the parent controls whether to reset the table after data updates or not via skipPageReset prop
+    // useEffect(() => {
+    //     skipPageResetRef.current = false
+    // }, [data])
 
     const tableColumns = useMemo(
         () => [
@@ -49,6 +54,8 @@ export default function Table({ data, columns, onRowClick }) {
         [columns]
     )
 
+    skipPageResetRef.current = skipPageReset
+
     const table = useReactTable({
         data,
         columns: tableColumns,
@@ -67,11 +74,12 @@ export default function Table({ data, columns, onRowClick }) {
         autoResetFilters: !skipPageResetRef.current,
     })
 
+    // commented out - not used
     // Helper function to update data while preserving pagination
-    const updateData = (newData) => {
-        skipPageResetRef.current = true
-        setData(newData)
-    }
+    // const updateData = (newData) => {
+    //     skipPageResetRef.current = true
+    //     setData(newData)
+    // }
 
     // Pagination controls
     const pageCount = table.getPageCount()
@@ -114,7 +122,7 @@ export default function Table({ data, columns, onRowClick }) {
                     {table.getRowModel().rows.map((row) => (
                         <tr
                             key={row.id}
-                            className="hover:bg-gray-50 pointer-cursor"
+                            className="hover:bg-gray-50 cursor-pointer" // fix pointer cursor classname typo
                             onClick={(e) => {
                                 // Prevent row click when clicking on interactive elements (e.g., buttons, inputs)
                                 if (
@@ -126,7 +134,7 @@ export default function Table({ data, columns, onRowClick }) {
                                     return
                                 }
 
-                                onRowClick(e, row.original)
+                                onRowClick?.(e, row.original) // it's optional, authors page and books page don't on row click
                             }}
                         >
                             {row.getVisibleCells().map((cell) => (

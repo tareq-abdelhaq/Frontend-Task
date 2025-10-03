@@ -3,6 +3,8 @@ import React, { useMemo } from 'react'
 import Table from './Table/Table'
 import TableActions from './ActionButton/TableActions'
 
+const DEFAULT_COLUMNS = ['id', 'name', 'pages', 'author', 'actions']
+
 const BooksTable = ({
     books,
     authors,
@@ -12,7 +14,9 @@ const BooksTable = ({
     setEditName,
     setBooks,
     deleteBook,
-    columnsConfig = ['id', 'name', 'pages', 'author', 'actions'], // Default columns
+    skipPageReset,
+    setSkipPageReset,
+    columnsConfig = DEFAULT_COLUMNS, // Default columns
 }) => {
     // Create a lookup map for authors
     const authorMap = useMemo(() => {
@@ -63,7 +67,6 @@ const BooksTable = ({
                 id: 'actions',
                 cell: ({ row }) => (
                     <TableActions
-                        row={row}
                         onEdit={
                             editingRowId === row.original.id
                                 ? handleCancel
@@ -86,12 +89,14 @@ const BooksTable = ({
 
     // Handle editing
     const handleEdit = (book) => {
+        setSkipPageReset(true) // persist the table page state
         setEditingRowId(book.id)
         setEditName(book.name)
     }
 
     // Save edited name
     const handleSave = (id) => {
+        setSkipPageReset(true) // persist the table page state
         setBooks(
             books.map((book) =>
                 book.id === id ? { ...book, name: editName } : book
@@ -103,11 +108,18 @@ const BooksTable = ({
 
     // Cancel editing
     const handleCancel = () => {
+        setSkipPageReset(true) // persist the table page state
         setEditingRowId(null)
         setEditName('')
     }
 
-    return <Table data={enrichedBooks} columns={columns} />
+    return (
+        <Table
+            data={enrichedBooks}
+            columns={columns}
+            skipPageReset={skipPageReset}
+        />
+    )
 }
 
 export default BooksTable

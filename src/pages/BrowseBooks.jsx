@@ -1,12 +1,24 @@
 // src/pages/Browse.jsx
-import React from 'react'
+import { useState } from 'react'
 import Loading from '../pages/Loading'
 import BookCard from '../components/Cards/BookCard'
-import useLibraryData from '../hooks/useLibraryData'
+import { useLibraryData } from '../hooks/useLibraryData'
 
 const BrowseBooks = () => {
     // Use the custom hook
     const { booksWithStores, isLoading } = useLibraryData()
+
+    // Manage sold books state
+    // using set to avoid duplicate books and O(1) time complexity for checking if a book is sold
+    const [soldBooks, setSoldBooks] = useState(new Set())
+
+    const handleSellBook = (bookId) => {
+        setSoldBooks((prevSoldBooks) => {
+            const newSoldBooks = new Set(prevSoldBooks)
+            newSoldBooks.add(bookId)
+            return newSoldBooks
+        })
+    }
 
     if (isLoading) {
         return <Loading />
@@ -21,9 +33,12 @@ const BrowseBooks = () => {
                 {booksWithStores.map((book, index) => (
                     <BookCard
                         key={index}
+                        id={book.id}
                         title={book.title}
                         author={book.author}
                         stores={book.stores}
+                        onSell={handleSellBook}
+                        isSold={soldBooks.has(book.id)}
                     />
                 ))}
             </div>

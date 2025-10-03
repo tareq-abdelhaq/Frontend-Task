@@ -6,10 +6,11 @@ import { useSearchParams } from 'react-router-dom'
 
 import Modal from '../components/Modal'
 import TableActions from '../components/ActionButton/TableActions'
+import { useLibraryData } from '../hooks/useLibraryData'
 
 const Authors = () => {
-    const [authors, setAuthors] = useState([])
-    const [searchParams, setSearchParams] = useSearchParams()
+    const { authors: fetchedAuthors } = useLibraryData()
+    const [searchParams] = useSearchParams()
     const [searchTerm, setSearchTerm] = useState(
         searchParams.get('search') || ''
     )
@@ -17,23 +18,19 @@ const Authors = () => {
     const [editName, setEditName] = useState('')
     const [newName, setNewName] = useState('')
     const [showModal, setShowModal] = useState(false)
+    const [skipPageReset, setSkipPageReset] = useState(false)
+    const [authors, setAuthors] = useState([])
+
+    // sync authors with fetched authors
+    useEffect(() => {
+        setAuthors(fetchedAuthors)
+    }, [fetchedAuthors])
 
     // Sync searchTerm with query params
     useEffect(() => {
         const search = searchParams.get('search') || ''
         setSearchTerm(search)
     }, [searchParams])
-
-    // Fetch JSON data
-    useEffect(() => {
-        fetch('/data/authors.json')
-            .then((response) => response.json())
-            .then((data) => {
-                console.log('Fetched authors:', data)
-                setAuthors(Array.isArray(data) ? data : [data])
-            })
-            .catch((error) => console.error('Error fetching authors:', error))
-    }, [])
 
     // filter based on search
     const filteredAuthors = useMemo(() => {
@@ -79,7 +76,6 @@ const Authors = () => {
                 id: 'actions',
                 cell: ({ row }) => (
                     <TableActions
-                        row={row}
                         onEdit={
                             editingRowId === row.original.id
                                 ? handleCancel
@@ -107,6 +103,7 @@ const Authors = () => {
                 `Are you sure you want to delete ${first_name} ${last_name}?`
             )
         ) {
+            setSkipPageReset(true) // persist the table page state
             setAuthors((prevAuthors) =>
                 prevAuthors.filter((author) => author.id !== id)
             )
@@ -124,6 +121,8 @@ const Authors = () => {
     const handleSave = (id) => {
         const [first_name, ...last_name_parts] = editName.trim().split(' ')
         const last_name = last_name_parts.join(' ')
+
+        setSkipPageReset(true) // persist the table page state
 
         setAuthors(
             authors.map((author) =>
@@ -165,8 +164,8 @@ const Authors = () => {
             last_name: last_name || '',
         }
 
-        setAuthors((prevAuthors) => [...prevAuthors, newAuthor])
-
+        setSkipPageReset(false) // reset the table page state since we are adding a new one at the top
+        setAuthors((prevAuthors) => [newAuthor, ...prevAuthors])
         setNewName('')
         closeModal()
     }
@@ -175,7 +174,11 @@ const Authors = () => {
         <div className="py-6">
             <Header addNew={openModal} title="Authors List" />
             {authors.length > 0 ? (
-                <Table data={filteredAuthors} columns={columns} />
+                <Table
+                    data={filteredAuthors}
+                    columns={columns}
+                    skipPageReset={skipPageReset}
+                />
             ) : (
                 <Loading />
             )}

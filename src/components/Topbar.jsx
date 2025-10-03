@@ -26,6 +26,13 @@ const Topbar = () => {
             title: 'Store Inventory',
             subtitle: 'Admin > Store Inventory',
         },
+
+        // Add missing header for browser stores page
+        '/browsestores': {
+            title: 'Browse Stores',
+            subtitle: 'Shop > Stores',
+        },
+
         '/browsebooks': {
             title: 'Browse Books',
             subtitle: 'Shop > Books',

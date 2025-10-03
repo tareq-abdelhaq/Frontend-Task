@@ -24,11 +24,13 @@ const AuthorCard = ({ name, noOfBooks }) => {
                     </p>
                 </div>
 
-                <div className="flex  justify-end items-end">
+                {/* Commented out for now as there is no author profile page */}
+                {/* TODO: Add author profile page */}
+                {/* <div className="flex  justify-end items-end">
                     <button className="bg-main font-light text-white px-2 py-1 rounded">
                         View Profile
                     </button>
-                </div>
+                </div> */}
             </div>
         </div>
     )

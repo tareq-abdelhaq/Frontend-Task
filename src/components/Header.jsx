@@ -14,7 +14,8 @@ const Header = ({ addNew, title, buttonTitle }) => {
                     addNew()
                 }}
             >
-                {buttonTitle || `Add New ${title.split(' ')[0]}`}
+                {/* fallback to empty string if title is empty */}
+                {buttonTitle || `Add New ${title.split(' ')[0] || ''}`}{' '}
             </button>
         </div>
     )

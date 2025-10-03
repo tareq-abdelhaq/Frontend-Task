@@ -2,7 +2,7 @@
 import React from 'react'
 import Loading from '../pages/Loading'
 import StoreCard from '../components/Cards/StoreCard'
-import useLibraryData from '../hooks/useLibraryData'
+import { useLibraryData } from '../hooks/useLibraryData'
 
 const BrowseStores = () => {
     const { stores, inventory, isLoading } = useLibraryData()

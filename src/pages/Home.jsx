@@ -5,11 +5,22 @@ import Loading from '../pages/Loading'
 import StoreCard from '../components/Cards/StoreCard'
 import BookCard from '../components/Cards/BookCard'
 import AuthorCard from '../components/Cards/AuthorCard'
-import useLibraryData from '../hooks/useLibraryData'
+import { useLibraryData } from '../hooks/useLibraryData'
 
 const Home = () => {
     const { stores, booksWithStores, authors, books, inventory, isLoading } =
         useLibraryData()
+
+    // Manage sold books state
+    const [soldBooks, setSoldBooks] = React.useState(new Set())
+
+    const handleSellBook = (bookId) => {
+        setSoldBooks((prevSoldBooks) => {
+            const newSoldBooks = new Set(prevSoldBooks)
+            newSoldBooks.add(bookId)
+            return newSoldBooks
+        })
+    }
 
     const storesWithMetrics = React.useMemo(() => {
         return stores.slice(0, 5).map((store) => {
@@ -24,6 +35,7 @@ const Home = () => {
             const averagePrice = noOfBooks > 0 ? totalPrice / noOfBooks : 0
 
             return {
+                id: store.id, // Fix broken navigation in StoreCard
                 name: store.name,
                 noOfBooks,
                 averagePrice,
@@ -31,6 +43,8 @@ const Home = () => {
         })
     }, [stores, inventory])
 
+    // slice would yeild books with stores, so we add the sold books state here too
+    // in this demo data, it's not appeared but in the real data, it would be
     const limitedBooksWithStores = booksWithStores.slice(0, 5)
 
     const authorsWithBookCount = React.useMemo(() => {
@@ -66,10 +80,10 @@ const Home = () => {
                     {storesWithMetrics.map((store, index) => (
                         <div key={index} className="flex-shrink-0">
                             <StoreCard
+                                id={store.id}
                                 name={store.name}
                                 noOfBooks={store.noOfBooks}
                                 averagePrice={store.averagePrice}
-                                id={store.id}
                             />
                         </div>
                     ))}
@@ -94,6 +108,9 @@ const Home = () => {
                                 title={book.title}
                                 author={book.author}
                                 stores={book.stores}
+                                id={book.id}
+                                onSell={handleSellBook}
+                                isSold={soldBooks.has(book.id)}
                             />
                         </div>
                     ))}
