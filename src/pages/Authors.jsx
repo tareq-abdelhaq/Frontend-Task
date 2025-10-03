@@ -9,28 +9,14 @@ import TableActions from '../components/ActionButton/TableActions'
 import { useLibraryData } from '../hooks/useLibraryData'
 
 const Authors = () => {
-    const { authors: fetchedAuthors } = useLibraryData()
+    const { authors, setAuthors } = useLibraryData()
     const [searchParams] = useSearchParams()
-    const [searchTerm, setSearchTerm] = useState(
-        searchParams.get('search') || ''
-    )
+    const searchTerm = searchParams.get('search') || ''
     const [editingRowId, setEditingRowId] = useState(null)
     const [editName, setEditName] = useState('')
     const [newName, setNewName] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [skipPageReset, setSkipPageReset] = useState(false)
-    const [authors, setAuthors] = useState([])
-
-    // sync authors with fetched authors
-    useEffect(() => {
-        setAuthors(fetchedAuthors)
-    }, [fetchedAuthors])
-
-    // Sync searchTerm with query params
-    useEffect(() => {
-        const search = searchParams.get('search') || ''
-        setSearchTerm(search)
-    }, [searchParams])
 
     // filter based on search
     const filteredAuthors = useMemo(() => {

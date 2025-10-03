@@ -10,28 +10,44 @@ export const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
     const [stores, setStores] = useState([])
     const [inventory, setInventory] = useState([])
 
-    // Fetch all data
+    // Fetch all data only if not already loaded
     useEffect(() => {
-        fetch(`${API_BASE_URL}/stores`)
-            .then((response) => response.json())
-            .then((data) => setStores(Array.isArray(data) ? data : [data]))
-            .catch((error) => console.error('Error fetching stores:', error))
+        if (stores.length === 0) {
+            fetch(`${API_BASE_URL}/stores`)
+                .then((response) => response.json())
+                .then((data) => setStores(Array.isArray(data) ? data : [data]))
+                .catch((error) =>
+                    console.error('Error fetching stores:', error)
+                )
+        }
 
-        fetch(`${API_BASE_URL}/books`)
-            .then((response) => response.json())
-            .then((data) => setBooks(Array.isArray(data) ? data : [data]))
-            .catch((error) => console.error('Error fetching books:', error))
+        if (books.length === 0) {
+            fetch(`${API_BASE_URL}/books`)
+                .then((response) => response.json())
+                .then((data) => setBooks(Array.isArray(data) ? data : [data]))
+                .catch((error) => console.error('Error fetching books:', error))
+        }
 
-        fetch(`${API_BASE_URL}/authors`)
-            .then((response) => response.json())
-            .then((data) => setAuthors(Array.isArray(data) ? data : [data]))
-            .catch((error) => console.error('Error fetching authors:', error))
+        if (authors.length === 0) {
+            fetch(`${API_BASE_URL}/authors`)
+                .then((response) => response.json())
+                .then((data) => setAuthors(Array.isArray(data) ? data : [data]))
+                .catch((error) =>
+                    console.error('Error fetching authors:', error)
+                )
+        }
 
-        fetch(`${API_BASE_URL}/inventory`)
-            .then((response) => response.json())
-            .then((data) => setInventory(Array.isArray(data) ? data : [data]))
-            .catch((error) => console.error('Error fetching inventory:', error))
-    }, [])
+        if (inventory.length === 0) {
+            fetch(`${API_BASE_URL}/inventory`)
+                .then((response) => response.json())
+                .then((data) =>
+                    setInventory(Array.isArray(data) ? data : [data])
+                )
+                .catch((error) =>
+                    console.error('Error fetching inventory:', error)
+                )
+        }
+    }, [stores.length, books.length, authors.length, inventory.length])
 
     // Create lookup maps
     const authorMap = useMemo(() => {
@@ -72,6 +88,7 @@ export const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
                 return {
                     ...book,
                     price: inventoryItem ? inventoryItem.price : null,
+                    author: authorMap[book.author_id],
                 }
             })
 
@@ -119,7 +136,9 @@ export const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
         books,
         setBooks,
         authors,
+        setAuthors,
         stores,
+        setStores,
         inventory,
         setInventory,
         authorMap,

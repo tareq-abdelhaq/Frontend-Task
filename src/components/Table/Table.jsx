@@ -122,8 +122,10 @@ export default function Table({
                     {table.getRowModel().rows.map((row) => (
                         <tr
                             key={row.id}
-                            className="hover:bg-gray-50 cursor-pointer" // fix pointer cursor classname typo
+                            className={`hover:bg-gray-50 ${onRowClick ? 'cursor-pointer' : ''}`} // fix pointer cursor classname typo
                             onClick={(e) => {
+                                // it's optional, some tables don't have row click
+                                if (!onRowClick) return
                                 // Prevent row click when clicking on interactive elements (e.g., buttons, inputs)
                                 if (
                                     e.target.tagName === 'BUTTON' ||
@@ -134,7 +136,7 @@ export default function Table({
                                     return
                                 }
 
-                                onRowClick?.(e, row.original) // it's optional, authors page and books page don't on row click
+                                onRowClick(e, row.original)
                             }}
                         >
                             {row.getVisibleCells().map((cell) => (

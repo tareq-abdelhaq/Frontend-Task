@@ -16,11 +16,9 @@ const Stores = () => {
     }
 
     // State declarations
-    const { stores: fetchedStores } = useLibraryData()
+    const { stores, setStores } = useLibraryData()
     const [searchParams] = useSearchParams()
-    const [searchTerm, setSearchTerm] = useState(
-        searchParams.get('search') || ''
-    )
+    const searchTerm = searchParams.get('search') || ''
     const [editingRowId, setEditingRowId] = useState(null)
     const [editName, setEditName] = useState('')
     const [showModal, setShowModal] = useState(false)
@@ -29,18 +27,6 @@ const Stores = () => {
         address: '',
     })
     const [skipPageReset, setSkipPageReset] = useState(false)
-    const [stores, setStores] = useState([])
-
-    // sync stores with fetched stores
-    useEffect(() => {
-        setStores(fetchedStores)
-    }, [fetchedStores])
-
-    // Sync search term with URL query parameters
-    useEffect(() => {
-        const search = searchParams.get('search') || ''
-        setSearchTerm(search)
-    }, [searchParams])
 
     // Enrich stores with computed address and filter based on search term
     const filteredStores = useMemo(() => {

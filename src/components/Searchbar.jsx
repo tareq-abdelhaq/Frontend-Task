@@ -10,9 +10,13 @@ const Searchbar = () => {
 
     useEffect(() => {
         if (searchTerm) {
-            setSearchParams({ search: searchTerm })
+            // prevent search param to override other params
+            searchParams.set('search', searchTerm)
+            setSearchParams(searchParams)
         } else {
-            setSearchParams({})
+            // clear only search param not all
+            searchParams.delete('search')
+            setSearchParams(searchParams)
         }
     }, [searchTerm, setSearchParams])
 

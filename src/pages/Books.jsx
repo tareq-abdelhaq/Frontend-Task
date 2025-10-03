@@ -9,11 +9,8 @@ import { useLibraryData } from '../hooks/useLibraryData'
 
 const Books = () => {
     const [searchParams] = useSearchParams()
-    const [searchTerm, setSearchTerm] = useState(
-        searchParams.get('search') || ''
-    )
+    const searchTerm = searchParams.get('search') || ''
     const [editingRowId, setEditingRowId] = useState(null)
-    const [editName, setEditName] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [newBook, setNewBook] = useState({
         author_id: '',
@@ -21,19 +18,7 @@ const Books = () => {
         page_count: '',
     })
     const [skipPageReset, setSkipPageReset] = useState(false)
-    const { books: fetchedBooks, authors } = useLibraryData() // Unified hook for all data
-    const [books, setBooks] = useState([])
-
-    // sync books with fetched books
-    useEffect(() => {
-        setBooks(fetchedBooks)
-    }, [fetchedBooks])
-
-    // Sync search term with URL params
-    useEffect(() => {
-        const search = searchParams.get('search') || ''
-        setSearchTerm(search)
-    }, [searchParams])
+    const { books, setBooks, authors } = useLibraryData() // Unified hook for all data
 
     // Filter books based on search
     const filteredBooks = books.filter((book) => {
@@ -49,8 +34,16 @@ const Books = () => {
             setSkipPageReset(true) // persist the table page state
             setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id))
             setEditingRowId(null)
-            setEditName('')
         }
+    }
+
+    // Save edited name
+    const handleSave = (id, newValue) => {
+        setBooks(
+            books.map((book) =>
+                book.id === id ? { ...book, name: newValue } : book
+            )
+        )
     }
 
     // Add new book handler
@@ -89,12 +82,11 @@ const Books = () => {
                     authors={authors}
                     editingRowId={editingRowId}
                     setEditingRowId={setEditingRowId}
-                    editName={editName}
-                    setEditName={setEditName}
-                    setBooks={setBooks}
-                    deleteBook={deleteBook}
                     skipPageReset={skipPageReset}
                     setSkipPageReset={setSkipPageReset}
+                    onSave={handleSave}
+                    onDelete={deleteBook}
+                    editableCell="name"
                 />
             ) : (
                 <Loading />
