@@ -13,9 +13,9 @@ const Modal = ({ show, /*setShow,*/ title, save, cancel, children }) => {
             }}
         >
             <div
-                className={`fixed inset-0 flex items-center justify-center bg-black/30 bg-opacity-50 ${show ? '' : 'hidden'}`}
+                className={`fixed inset-0 flex items-center justify-center bg-black/30 bg-opacity-50 z-50 ${show ? '' : 'hidden'}`}
             >
-                <div className="bg-white rounded-xl shadow-lg w-xl overflow-hidden">
+                <div className="bg-white rounded-xl shadow-lg w-xl overflow-hidden relative z-10">
                     <h2 className="text-lg  mb-4 bg-main text-white  p-4">
                         {title}
                     </h2>

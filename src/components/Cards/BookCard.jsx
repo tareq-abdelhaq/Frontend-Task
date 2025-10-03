@@ -6,7 +6,7 @@ import { randomColorGenerator } from '../../utils'
 
 const BookCard = ({ title, author, stores, id, onSell, isSold }) => {
     return (
-        <div className="relative bg-white shadow-md rounded-lg p-4 flex gap-4 w-full max-w-md">
+        <div className="relative bg-white shadow-md rounded-lg p-4 flex gap-4 w-full max-w-md z-0">
             {/* Sold Badge */}
             {isSold && (
                 <span className="absolute top-0 start-0 bg-green-600 text-white text-xs px-2 py-0.5 rounded">
