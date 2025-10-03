@@ -7,10 +7,12 @@ import Modal from '../components/Modal'
 import TableActions from '../components/ActionButton/TableActions'
 import { useNavigate } from 'react-router-dom'
 import { useLibraryData } from '../hooks/useLibraryData'
+import { useAuth } from '../context'
 
 const Stores = () => {
     const navigate = useNavigate()
 
+    const { isAuthenticated } = useAuth()
     const handleViewStoreInventory = (storeId) => {
         navigate(`/store/${storeId}`)
     }
@@ -46,8 +48,8 @@ const Stores = () => {
     }, [stores, searchTerm])
 
     // Define table columns
-    const columns = useMemo(
-        () => [
+    const columns = useMemo(() => {
+        const cols = [
             { header: 'Store Id', accessorKey: 'id' },
             {
                 header: 'Name',
@@ -71,25 +73,23 @@ const Stores = () => {
                     ),
             },
             { header: 'Address', accessorKey: 'full_address' },
-            {
+        ]
+        if (isAuthenticated) {
+            cols.push({
                 header: 'Actions',
                 id: 'actions',
                 cell: ({ row }) => (
                     <TableActions
-                        onEdit={
-                            editingRowId === row.original.id
-                                ? handleCancel
-                                : () => handleEdit(row.original)
-                        }
+                        onEdit={() => handleEdit(row.original)}
                         onDelete={() =>
                             deleteStore(row.original.id, row.original.name)
                         }
                     />
                 ),
-            },
-        ],
-        [editingRowId, editName]
-    )
+            })
+        }
+        return cols
+    }, [editingRowId, editName, isAuthenticated])
 
     // Handle store deletion
     const deleteStore = (id, name) => {

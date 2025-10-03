@@ -1,6 +1,8 @@
 // src/components/BooksTable.jsx
 import { useMemo, useState } from 'react'
 
+import { useAuth } from '../context'
+
 import Table from './Table/Table'
 import TableActions from './ActionButton/TableActions'
 
@@ -20,6 +22,8 @@ const BooksTable = (props) => {
         onDelete,
         editableCell = 'name', // name or price
     } = props
+
+    const { isAuthenticated } = useAuth()
 
     // state for editing cell
     const [editValue, setEditValue] = useState('')
@@ -92,7 +96,7 @@ const BooksTable = (props) => {
                         `$${row.original.price?.toFixed(2) || '0.00'}`
                     ),
             },
-            actions: {
+            actions: isAuthenticated && {
                 header: 'Actions',
                 id: 'actions',
                 cell: ({ row }) => (
@@ -109,7 +113,7 @@ const BooksTable = (props) => {
                 ),
             },
         }),
-        [editingRowId, editableCell, editValue]
+        [editingRowId, editableCell, editValue, isAuthenticated]
     )
 
     // Local handlers that manage editValue state

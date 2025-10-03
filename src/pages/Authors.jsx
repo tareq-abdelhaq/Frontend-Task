@@ -3,7 +3,7 @@ import Header from '../components/Header'
 import Loading from './Loading'
 import Table from '../components/Table/Table'
 import { useSearchParams } from 'react-router-dom'
-
+import { useAuth } from '../context'
 import Modal from '../components/Modal'
 import TableActions from '../components/ActionButton/TableActions'
 import { useLibraryData } from '../hooks/useLibraryData'
@@ -11,12 +11,19 @@ import { useLibraryData } from '../hooks/useLibraryData'
 const Authors = () => {
     const { authors, setAuthors } = useLibraryData()
     const [searchParams] = useSearchParams()
-    const searchTerm = searchParams.get('search') || ''
+    const [searchTerm, setSearchTerm] = useState('')
     const [editingRowId, setEditingRowId] = useState(null)
     const [editName, setEditName] = useState('')
     const [newName, setNewName] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [skipPageReset, setSkipPageReset] = useState(false)
+    const { isAuthenticated } = useAuth()
+
+    // Sync searchTerm with query params
+    useEffect(() => {
+        const search = searchParams.get('search') || ''
+        setSearchTerm(search)
+    }, [searchParams])
 
     // filter based on search
     const filteredAuthors = useMemo(() => {
@@ -29,8 +36,8 @@ const Authors = () => {
         )
     }, [authors, searchTerm])
 
-    const columns = useMemo(
-        () => [
+    const columns = useMemo(() => {
+        const cols = [
             { header: 'ID', accessorKey: 'id' },
             {
                 header: 'Name',
@@ -57,16 +64,14 @@ const Authors = () => {
                         `${row.original.first_name} ${row.original.last_name}`
                     ),
             },
-            {
+        ]
+        if (isAuthenticated) {
+            cols.push({
                 header: 'Actions',
                 id: 'actions',
                 cell: ({ row }) => (
                     <TableActions
-                        onEdit={
-                            editingRowId === row.original.id
-                                ? handleCancel
-                                : () => handleEdit(row.original)
-                        }
+                        onEdit={() => handleEdit(row.original)}
                         onDelete={() =>
                             deleteAuthor(
                                 row.original.id,
@@ -76,10 +81,10 @@ const Authors = () => {
                         }
                     />
                 ),
-            },
-        ],
-        [[editingRowId, editName]]
-    )
+            })
+        }
+        return cols
+    }, [editingRowId, editName, isAuthenticated])
 
     const deleteAuthor = (id, first_name, last_name) => {
         // show prompt

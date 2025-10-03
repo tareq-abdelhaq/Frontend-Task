@@ -1,4 +1,14 @@
 {
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "first_name": "Admin",
+            "last_name": "User",
+            "email": "admin@library.com",
+            "password": "admin123"
+        }
+    ],
     "authors": [
         {
             "id": 1,

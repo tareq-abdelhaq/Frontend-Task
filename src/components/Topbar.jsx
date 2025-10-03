@@ -1,9 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
+
+import { useAuth } from '../context'
+
+import LoginModal from './LoginModal'
+
 import usrImg from '../assets/usr.png'
+
 const Topbar = () => {
     const location = useLocation()
+    const { isAuthenticated, user, logout } = useAuth()
+    const [showLoginModal, setShowLoginModal] = useState(false)
     const path = location.pathname
+
     const title = {
         '/': {
             title: 'Shop',
@@ -54,11 +63,33 @@ const Topbar = () => {
                 </p>
             </div>
             <div className="flex-1 flex justify-end items-center">
-                <img src={usrImg} alt="profile" className="ml-4 rounded" />
-                <p className="text-secondary-text font-light ml-1 h-full">
-                    User Name
-                </p>
+                {isAuthenticated ? (
+                    <div className="flex items-center gap-3">
+                        <img src={usrImg} alt="profile" className="rounded" />
+                        <p className="text-secondary-text font-light h-full">
+                            {user.username}
+                        </p>
+                        <button
+                            onClick={logout}
+                            className="text-sm text-gray-600 hover:text-gray-800 px-2 py-1 rounded hover:bg-gray-100"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowLoginModal(true)}
+                        className="text-sm bg-white text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50"
+                    >
+                        Sign In
+                    </button>
+                )}
             </div>
+
+            <LoginModal
+                show={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+            />
         </div>
     )
 }
